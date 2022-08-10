@@ -1,0 +1,42 @@
+name: toc-generate
+
+# feature以下のブランチにプッシュされた場合のみ起動
+on: 
+  push:
+    branches:
+      - "feature/*"
+
+jobs:
+  # with以下でtoc-generatorの設定を指定
+  generateTOC:
+    name: TOC Generator
+    runs-on: ubuntu-latest
+    steps:
+      - uses: technote-space/load-config-action@v1
+        with:
+          CONFIG_FILENAME: workflow-settings.json
+      - name: toc-generator
+        uses: technote-space/toc-generator@v3
+        with:
+          FOLDING: ${{ env.TOC_FOLDING }}
+          TOC_TITLE: ${{ env.TOC_TITLE }}
+          COMMIT_MESSAGE: ${{ env.TOC_COMMIT_MESSAGE }}
+          TARGET_PATHS: ${{ env.TOC_TARGET_PATHS }}
+  
+  # with以下でslack通知先の設定を指定
+  slack-notify:
+    if: always()
+    needs: [generateTOC]
+    name: workflow notification to slack
+    runs-on: ubuntu-latest
+    steps:
+      - uses: technote-space/load-config-action@v1
+        with:
+          CONFIG_FILENAME: workflow-settings.json
+      - uses: Gamesight/slack-workflow-status@master
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          slack_webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          name: ${{ env.WORKFLOW_NOTIFICATION_BOT_NAME }}
+          channel: ${{ env.WORKFLOW_NOTIFICATION_CHANNEL_NAME }}
+          icon_url: ${{ env.WORKFLOW_NOTIFICATION_ICON_URL }}

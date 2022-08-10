@@ -1,0 +1,8 @@
+{
+    "TOC_TITLE": "目次",
+    "TOC_TARGET_PATHS": "**/*.md",
+    "TOC_COMMIT_MESSAGE": "docs: toc-generatorによる目次自動作成",
+    "WORKFLOW_NOTIFICATION_BOT_NAME": "目次自動生成くん",
+    "WORKFLOW_NOTIFICATION_CHANNEL_NAME": "#notify-github",
+    "WORKFLOW_NOTIFICATION_ICON_URL": "https://user-images.githubusercontent.com/47489629/104346721-16e1d200-5543-11eb-869f-80ac22ee4501.png"
+  }

@@ -1,6 +1,5 @@
 # クロージャを理解する
 
-目次
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 目次
@@ -54,12 +53,53 @@
 
 ## 使用するときに注意すべきことはなんでしょうか？
 
+# キャプチャとはなんでしょうか？
+
+- クロージャが実行されるスコープが、変数や定数が定義されたローカルスコープ外であっても、クロージャの実行時に利用できる
+  - 理由：クロージャが、自身が定義されたスコープの変数や定数への参照を保持しているため
+
+```swift
+let greeting: (String) -> String
+// doはcatchと一緒に使うが、新しいスコープを作成するために使うこともできる
+do {
+    let symbol = "!"
+    greeting = { user in
+        return "Hello, \(user)\(symbol)"  // symbolはgreetingのスコープ外だが、利用できる
+    }
+}
+greeting("Ishikawa")
+//symbol  cannot find symbol in scopeのエラー
+```
+
+- 変数や定数に入っている値ではなく、変数や定数自身を保持する（= キャプチャ）。そのため、キャプチャされている変数への変更は、クロージャの実行時にも反映される
+
+```swift
+let counter: () -> Int
+do {
+    var count = 0
+    counter = {
+        count += 1
+        return count
+    }
+}
+counter()  // 1になる
+counter()  // 2になる
+```
+
+### `self`のキャプチャとはなんでしょうか？
+
 ## エスケープクロージャとオートクロージャの違いはなんでしょうか？
 
 ## その他の整理
 
-- 
+### 戻り値がないクロージャ
 
-### インアウト引数と普通の引数の違い
+- Swiftでは`()`と`Void`は同じ
+- クロージャでは戻り値がない場合は、`() -> Void`と記述する
+
+```swift
+// 戻り値のないクロージャ
+let emptyReturnValueClosure: () -> Void = {}
+```
 
 ## 参考

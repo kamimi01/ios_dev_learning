@@ -43,3 +43,35 @@ var user1: String = ""
 print("user1（変更前）：\(user1)")
 greet(user: &user1)
 print("user1（変更後）: \(user1)")  // user1 の値は `not empty`に変わる。引数への再代入を関数外の user1 に反映させている
+
+// 戻り値のないクロージャ
+let emptyReturnValueClosure: () -> Void = {}
+
+// 1つの戻り値をもつクロージャ
+let singleReturnValueClosure: () -> Int = {
+    return 1
+}
+
+// キャプチャ
+let greeting: (String) -> String
+// doはcatchと一緒に使うが、新しいスコープを作成するために使うこともできる
+do {
+    let symbol = "!"
+    greeting = { user in
+        return "Hello, \(user)\(symbol)"  // symbolはgreetingのスコープ外だが、利用できる
+    }
+}
+greeting("Ishikawa")
+//symbol  cannot find symbol in scopeのエラー
+
+// キャプチャするのは、変数や定数に入っている値ではなく、変数や定数自身
+let counter: () -> Int
+do {
+    var count = 0
+    counter = {
+        count += 1
+        return count
+    }
+}
+counter()  // 1になる
+counter()  // 2になる

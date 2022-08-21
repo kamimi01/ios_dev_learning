@@ -55,7 +55,7 @@
 
 ## 使用するときに注意すべきことはなんでしょうか？
 
-# キャプチャとはなんでしょうか？
+## キャプチャとはなんでしょうか？
 
 - クロージャが実行されるスコープが、変数や定数が定義されたローカルスコープ外であっても、クロージャの実行時に利用できる
   - 理由：クロージャが、自身が定義されたスコープの変数や定数への参照を保持しているため
@@ -88,9 +88,77 @@ counter()  // 1になる
 counter()  // 2になる
 ```
 
-### `self`のキャプチャとはなんでしょうか？
+## `self`のキャプチャとはなんでしょうか？
 
 ## エスケープクロージャとオートクロージャの違いはなんでしょうか？
+
+- `escaping`属性
+  - 関数に引数として渡されたクロージャが、関数のスコープ外で保持される可能性があることを示す属性
+  - コンパイラは、この属性の有無によって、クロージャがキャプチャを行う必要があるかどうかを判別する
+
+```swift
+var `queue` = [() -> Void]()  // クロージャはenqueue 関数のスコープ外で保持される
+
+func enqueue(operation: @escaping () -> Void) {
+    `queue`.append(operation)
+}
+
+enqueue {
+    print("executed")
+}
+enqueue {
+    print("executed")
+}
+
+queue.forEach { $0() }
+```
+
+- `autoclosure`属性
+  - 引数をクロージャで包むことで、遅延評価を実現するための属性
+    - クロージャを使用すると遅延評価が可能になり、無駄な関数の呼び出しを避けることができるが、呼び出し側が煩雑になる。
+    - それを回避するために使用する
+
+```swift
+// 論理和を求める関数
+func or(_ lhs: Bool, _ rhs: () -> Bool) -> Bool {
+    if lhs {
+        print("true")
+        return true
+    } else {
+        let rhs = rhs()  // lhsがtrueの時点で、こちらは実行されるまでもなく結果が決まるので、rhsをクロージャにすることで遅延評価を実現する
+        print(rhs)
+        return rhs
+    }
+}
+
+func lhs() -> Bool {
+    print("lhs()関数が実行された")
+    return true
+}
+
+func rhs() -> Bool {
+    print("rhs()関数が実行された")
+    return false
+}
+
+or(lhs(), { return rhs() })  // 遅延評価できたはいいものの、呼び出し側が煩雑に・・・
+
+// autoclosureを使用する
+func or1(_ lhs: Bool, _ rhs: @autoclosure () -> Bool) -> Bool {
+    if lhs {
+        print("true")
+        return true
+    } else {
+        let rhs = rhs()
+        print(rhs)
+        return rhs
+    }
+}
+
+// lhs()とrhs()の実装は省略
+
+or1(lhs(), rhs())  // { return rhs() } と書く必要がない
+```
 
 ## その他の整理
 
@@ -103,5 +171,9 @@ counter()  // 2になる
 // 戻り値のないクロージャ
 let emptyReturnValueClosure: () -> Void = {}
 ```
+
+### クロージャとしての関数
+
+
 
 ## 参考

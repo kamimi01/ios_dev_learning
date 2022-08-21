@@ -75,3 +75,83 @@ do {
 }
 counter()  // 1になる
 counter()  // 2になる
+
+// escaping属性
+var `queue` = [() -> Void]()  // クロージャはenqueue 関数のスコープ外で保持される
+
+func enqueue(operation: @escaping () -> Void) {
+    `queue`.append(operation)
+}
+
+enqueue {
+    print("executed")
+}
+enqueue {
+    print("executed")
+}
+
+queue.forEach { $0() }
+
+// escaping属性が不要な場合
+func executeTwice(operation: () -> Void) {
+    operation()
+    operation()  // 関数のスコープ内で保持されるので、escaping 属性は不要
+}
+
+executeTwice {
+    print("executed")
+}
+
+// 論理和を求める関数
+func or(_ lhs: Bool, _ rhs: () -> Bool) -> Bool {
+    if lhs {
+        print("true")
+        return true
+    } else {
+        let rhs = rhs()  // lhsがtrueの時点で、こちらは実行されるまでもなく結果が決まるので、rhsをクロージャにすることで遅延評価を実現する
+        print(rhs)
+        return rhs
+    }
+}
+
+func lhs() -> Bool {
+    print("lhs()関数が実行された")
+    return true
+}
+
+func rhs() -> Bool {
+    print("rhs()関数が実行された")
+    return false
+}
+
+or(lhs(), { return rhs() })  // 遅延評価できたはいいものの、呼び出し側が煩雑に・・・
+
+// autoclosureを使用する
+func or1(_ lhs: Bool, _ rhs: @autoclosure () -> Bool) -> Bool {
+    if lhs {
+        print("true")
+        return true
+    } else {
+        let rhs = rhs()
+        print(rhs)
+        return rhs
+    }
+}
+
+// lhs()とrhs()の実装は省略
+
+or1(lhs(), rhs())  // { return rhs() } と書く必要がない
+
+// クロージャとしての関数
+func double(_ x: Int) -> Int {
+    return x * 2
+}
+let function = double  // (Int) -> Int 型
+
+let array1 = [1, 2, 3]
+let doubledArray1 = array1.map { $0 * 2 }
+doubledArray1
+
+let array2 = [4, 5, 6]
+let doubledArray2 = array2.max { $0 * 2 }
+doubledArray2
